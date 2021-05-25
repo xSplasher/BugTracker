@@ -1,0 +1,68 @@
+{% extends "polls/base.html" %}
+
+{% block title %}Home{% endblock title %}
+
+{% block content %}
+
+    <br>
+
+    {% if issues %}
+    <input class='btn btn-primary' type='button' value='Create Ticket' onclick='location.href="{% url 'polls:createissue' %}";' />
+    <p>
+        <ul>
+        {% for issue in issues %}
+    
+            
+            
+
+    
+            <div class='' style="cursor:pointer;padding-top:9px;padding-left:9px;margin-top:21px;background-color:#000000;color:#FFFFFF;border: 1px solid white;border-radius: 9px;" onclick='location.href="{% url 'polls:issueview' issue.theid %}"'>
+
+                <label class='float-right' style='width:9%;margin-right:12px;margin-top:10px;margin-left:6px;font-size: 15px;border: 1px solid white;padding-left:7px;padding-right:7px;padding-top:3px;padding-bottom:3px;border-radius: 9px;'>
+                    {% if issue.priority == 'low' %} <!-- yellow low -->
+                        <span class='float-right' style='margin-left:10px;margin-top:6px;height: 13px;width: 13px;background-color:#ffff00;border-radius: 50%;display: inline-block;'></span>
+                    {% elif issue.priority == 'medium' %}
+                        <span class='float-right' style='margin-left:10px;margin-top:6px;height: 13px;width: 13px;background-color:#ffbf00;border-radius: 50%;display: inline-block;'></span>
+                    {% elif issue.priority == 'high' %}
+                        <span class='float-right' style='margin-left:10px;margin-top:6px;height: 13px;width: 13px;background-color:#ff8000;border-radius: 50%;display: inline-block;'></span>
+                    {% elif issue.priority == 'critical' %}
+                        <span class='float-right' style='margin-left:10px;margin-top:6px;height: 13px;width: 13px;background-color:#ff0000;border-radius: 50%;display: inline-block;'></span>
+                    {% endif %}
+
+                    {{issue.priority|capfirst}}
+                
+                </label>
+
+                {% if issue.isIssueSolved is False %}
+
+                    <label class='float-right' style='text-align: center;font-weight:bold;background-color:green;width:9%;margin-right:12px;margin-top:10px;margin-left:6px;font-size: 15px;border: 1px solid white;padding-left:7px;padding-right:7px;padding-top:3px;padding-bottom:3px;border-radius: 9px;'>
+
+                        Open
+                    </label>
+
+                {% elif issue.isIssueSolved is True %}
+                    <label class='float-right' style='text-align: center;font-weight:bold;background-color:grey;width:9%;margin-right:12px;margin-top:10px;margin-left:6px;font-size: 15px;border: 1px solid white;padding-left:7px;padding-right:7px;padding-top:3px;padding-bottom:3px;border-radius: 9px;'>
+
+                        Closed
+                    </label>
+                {% endif %}
+
+
+                
+
+                <p style="font-weight: bold;width:70%;word-wrap:break-word;"><a href="{% url 'polls:issueview' issue.theid %}">{{ issue.issue_name }}</a></p>
+                <label style="font-size: 15px;">created by:  {{ issue.created_by|title }} </label>
+                <label style="font-size: 15px;margin-left:45px;"> assigned to : {{ issue.assignto|title }} </label>
+                
+            </div>
+        {% endfor %}       
+        </ul>
+    </p>
+    
+   
+
+    {% else %}
+        <p>No polls are available.</p>
+    {% endif %}
+
+{% endblock  %}

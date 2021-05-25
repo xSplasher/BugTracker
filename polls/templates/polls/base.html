@@ -1,0 +1,142 @@
+
+{% load extra %}  
+
+<!DOCTYPE html>
+
+<html style="background-color:#000000;color:#FFFFFF;">
+    <head>
+        <title>{% block title %}{% endblock %}</title>
+        <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+    </head>
+
+
+
+
+    <body style="background-color:#000000;color:#FFFFFF;">
+        <nav class="navbar navbar-expand-lg bg-dark" >
+           <li class="nav-item active" style="list-style-type: none;"> <a style='color:white' href="{% url 'polls:indexpage' %}" class='nav-link'>Home</a></li>
+
+           {% if user.is_authenticated %}
+           <li class="nav-item active" style="list-style-type: none;"> <a style='color:white' href="{% url 'polls:mytickets' %}"" class='nav-link'>my Tickets</a></li>
+           {% endif %}
+           <!--  <li class="nav-item active" style="list-style-type: none;"> <a style='color:white' href="{% url 'polls:createissue' %}" class='nav-link'>Add Issue</a></li>-->
+
+            {% if user.is_authenticated %}
+                <li class='nav-item active ml-auto' style='list-style-type: none;'><span style='padding-right: 12px;'>Welcome {{user.username|title}}</span></li>
+            
+
+            {% endif %}
+            
+
+
+            
+
+           
+
+            <div class='navbar-nav ml-auto'>
+
+                {% if user.is_authenticated %}
+                    <li id='thenotif1' class="nav-item active" style="list-style-type: none;padding-right: 12px;"><a id='thenotif'>Notification</a></li>
+
+                    <li class='nav-item active float-right' style='list-style-type: none;'><span style='padding-right: 12px;'></span>  <a class="nav-item active" style='color:white;' href="{% url 'logout' %}">Logout</a></li>
+                {% elif 'login' not in request.path %}
+                    <li class='nav-item active float-right' style='list-style-type: none;'><a class="nav-item active" style='color:white;' href="{% url 'login' %}">Login</a></li>
+                {% endif %}
+
+            </div>
+        </nav>
+            <div id='notificationSection' style='background:white;margin-left:75%;width:25%;height:600px;position: absolute;color:black;visibility:hidden;display:none;overflow: auto;'>
+
+                {% get_all_users as theusers %}
+                {% for thenot in  theusers.thenotif %}
+
+                {% if thenot.isSeen is True %}
+                    <div style='border: 1px solid black; cursor: pointer; ' onclick="location.href='http://{{request.META.HTTP_HOST }}{{thenot.theLink}}';">
+                        {{thenot.thetext}}
+                    </div>
+                {% else %}
+
+                    <div style='font-weight: bold;border: 1px solid black; cursor: pointer; ' onclick="theclick('{{thenot.notificationID}}','{{thenot.theLink}}')">
+                        {{thenot.thetext}}
+                    </div>
+                {% endif %}
+
+                
+
+                <br><br>
+
+                {% endfor %}
+
+            </div>
+        <div id='content' name='content' class='container'>
+<br>
+            
+            
+            
+            
+
+            {% block content %}
+
+            {% endblock %}
+
+        </div>
+
+            <script>
+
+        const chatSocket2 = new WebSocket(
+            'ws://'
+            + window.location.host
+            + '/ws/updatenotif/'
+        );
+
+        chatSocket2.onmessage = function(e) {
+            const data = JSON.parse(e.data);
+            console.log(data['message']);
+            if((data['from'] == 'solvedIssue' || data['from'] == 'save' || data['from'] == 'delete') && data['message'] == 'success'){
+                location.reload();
+            }
+
+            if(data['from'] == 'deleteIssue' && data['message'] == 'success'){
+                window.location.href = '{% url 'polls:indexpage' %}';
+            }
+        };
+
+        window.onclick = e => {
+            //console.log(e.target.id);  // to get the element
+            //console.log(e.target.tagName);  // to get the element tag name alone
+
+            if(e.target.id == 'thenotif' || e.target.id == 'thenotif1'){
+
+                if(document.getElementById('notificationSection').style.visibility == 'hidden'){
+                    document.getElementById('notificationSection').style.visibility = 'visible';
+                    document.getElementById('notificationSection').style.display = 'block';                
+                }
+
+                else {
+                    document.getElementById('notificationSection').style.visibility = 'hidden';
+                    document.getElementById('notificationSection').style.display = 'None';
+                }   
+            }
+
+            else{
+                document.getElementById('notificationSection').style.visibility = 'hidden';
+                document.getElementById('notificationSection').style.display = 'None';
+            }
+        } 
+
+        function theclick(theid,thelink){
+            //http://{{request.META.HTTP_HOST }}
+            
+            chatSocket2.send(JSON.stringify({
+                'purpose':'update_notification',
+                'theid': theid
+            }));
+            location.href='http://127.0.0.1:8000'+thelink;
+        }
+        
+    </script>
+        <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
+        <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
+    </body>
+</html>

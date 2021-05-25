@@ -1,0 +1,38 @@
+{% extends 'polls/base.html' %}
+
+{% block title %}
+    GET NOTE MAN
+{% endblock title %}
+
+{% block content %}
+<br>
+
+<form action="#" method="post">
+    {% csrf_token %}
+ 
+    <div class="form-group">
+        <label>Name:</label>
+        <input class="form-control" name='thename' type="text">
+    </div>
+
+    <button type="submit" class="btn btn-primary">GET IT</button>
+
+
+</form>
+
+{% if info %}
+   {% for q in info %}
+<p>
+    <p>{{ q.issue_name }}</p>
+    <p>{{ q.created_by }}</p>
+    <p>{{ q.text }}</p>
+    <p>{{ q.at }}</p>
+</p>
+<br><br><br>
+{% endfor %}
+
+
+{% endif %}
+
+
+{% endblock content %}

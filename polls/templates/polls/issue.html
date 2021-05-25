@@ -1,0 +1,260 @@
+{% extends 'polls/base.html' %}
+
+            
+{% block title %}Issue{% endblock title %}
+
+{% block content %}
+
+            <script>
+                //const roomName = JSON.parse(document.getElementById('room-name').textContent);
+
+                const chatSocket = new WebSocket(
+                    'ws://'
+                    + window.location.host
+                    + '/ws/comment/'
+                );
+
+                chatSocket.onmessage = function(e) {
+                    const data = JSON.parse(e.data);
+                    console.log(data['message']);
+                    if((data['from'] == 'solvedIssue' ||data['from'] == 'save' || data['from'] == 'delete') && data['message'] == 'success'){
+                        location.reload();
+                    }
+
+                    if(data['from'] == 'deleteIssue' && data['message'] == 'success'){
+                        window.location.href = '{% url 'polls:indexpage' %}';
+                    }
+                };
+
+                function theclick(theid,thecomment){
+                    
+                    var thesht = 'editcomment-';
+
+                    //alert(typeof(theid))
+                    //console.log(thesht.concat(theid));
+                    document.getElementById('editcomment-'+theid).style.visibility = 'visible';
+                    document.getElementById('editcomment-'+theid).style.display = 'block';
+                    document.getElementById('txtarea-'+theid).value = thecomment;
+                    document.getElementById('savecomment-'+theid).style.visibility = 'hidden';
+                    document.getElementById('savecomment-'+theid).style.display = 'none';
+                    //alert(document.getElementById('editcomment-'+theid).style.visibilityState)
+                    
+                }
+
+                function cancelIT(theid){
+                    document.getElementById('editcomment-'+theid).style.visibility = 'hidden';
+                    document.getElementById('editcomment-'+theid).style.display = 'none';
+                    document.getElementById('savecomment-'+theid).style.visibility = 'visible';
+                    document.getElementById('savecomment-'+theid).style.display = 'block';
+                }
+
+
+                function saveit(theid){
+                    //alert(document.getElementById('txtarea-'+theid).value);
+                    chatSocket.send(JSON.stringify({
+                        'purpose':'save',
+                        'theid': theid,
+                        'thenewcomment': unescape(document.getElementById('txtarea-'+theid).value)
+                    }));
+                }
+
+                
+                function deleteit(theid){
+                    //alert(document.getElementById('txtarea-'+theid).value);
+                    chatSocket.send(JSON.stringify({
+                        'purpose':'delete',
+                        'theid': theid,
+                    }));
+                }
+
+
+                function deleteIssue(theid){
+                    //alert(document.getElementById('txtarea-'+theid).value);
+                    chatSocket.send(JSON.stringify({
+                        'purpose':'deleteIssue',
+                        'theid': theid,
+                    }));
+                }
+
+                function editIssue(theid){
+                    //alert(document.getElementById('txtarea-'+theid).value);
+                    chatSocket.send(JSON.stringify({
+                        'purpose':'deleteIssue',
+                        'theid': theid,
+                    }));
+                }
+
+
+                function solvedit(theid){                    
+                    chatSocket.send(JSON.stringify({
+                        'purpose':'solvedIssue',
+                        'theid': theid,
+                    }));
+                }
+
+                function solvedItComment(theid,secondid){          
+                    solvedit(secondid); 
+                    chatSocket.send(JSON.stringify({
+                        'purpose':'solvedIssueComment',
+                        'theid': theid,
+                    }));
+                }
+
+                function showsolvedcomment(){
+                    document.getElementById('solvedComment').style.visibility = 'visible';
+                    document.getElementById('solvedComment').style.display = 'block';
+                }
+
+                function updateSolvedCommentText(thetext, theperson){     
+                    document.getElementById('solvedText').innerHTML = thetext;
+                    document.getElementById('solvedName').innerHTML = theperson;
+                }
+
+                //document.querySelectorAll('[name=editbutton]')[0].onclick = function(e) {
+                      
+                    //alert(document.querySelector('[name=editbutton]').id)
+
+                    //const messageInputDom = document.querySelector('#chat-message-input');
+                    //const message = messageInputDom.value;
+                    //chatSocket.send(JSON.stringify({
+                    //    'message': message
+                    //}));
+                    //messageInputDom.value = '';
+                //};
+            </script>
+
+{% if True %} <!--user.is_authenticated-->
+    {% if object %}
+
+        <div class='' style="border: 1px solid white;padding-bottom:20px;border-radius: 9px;">
+            <div class='card-body' style='background: black;'>
+                
+                <label style='font-size: 15px;border: 1px solid white;padding-left:5px;padding-right:7px;padding-top:3px;padding-bottom:3px;border-radius: 9px;'>
+                    {% if object.priority == 'low' %} <!-- yellow low -->
+                        <span style='height: 13px;width: 13px;background-color:#ffff00;border-radius: 50%;display: inline-block;'></span>
+                    {% elif object.priority == 'medium' %}
+                        <span style='height: 13px;width: 13px;background-color:#ffbf00;border-radius: 50%;display: inline-block;'></span>
+                    {% elif object.priority == 'high' %}
+                        <span style='height: 13px;width: 13px;background-color:#ff8000;border-radius: 50%;display: inline-block;'></span>
+                    {% elif object.priority == 'critical' %}
+                        <span style='height: 13px;width: 13px;background-color:#ff0000;border-radius: 50%;display: inline-block;'></span>
+                    {% endif %}
+
+
+                {{object.priority|capfirst}} Priority</label>
+
+                {% if user.username == object.created_by %}      
+                    {% if object.isIssueSolved is False %}
+
+                        <input type='button' class='btn btn-danger btn-sm float-right' name='deleteIssue' style="margin-right:10px;" onclick="deleteIssue('{{object.theid}}')" value='Delete'>
+                        <input type='button' class='btn btn-info btn-sm float-right' name='markIssue' style="margin-right:10px;" onclick="solvedit('{{object.theid}}')" value='Mark as Solved'><br><br>
+                        
+                    {% elif object.isIssueSolved is True %}
+                        <label class='btn btn-info btn-sm float-right' name='solvedIssue' style="margin-right:10px;pointer-events: none;">Solved &#10003;</label>
+                    {% endif %}
+                {% endif %}
+                    <!--<span style='height: 15px;width: 15px;background-color:#e8e548;border-radius: 50%;display: inline-block;'></span>-->
+                    
+                    
+                    <!--<a id='{{c.commentId}}' href='javascript:void(0);' class='float-right' name='editIssue' onclick="theclick('{{c.commentId}}','{{c.comment|addslashes}}')">Edit</a>-->
+                    <h4 class='card-title' style='width:100%;word-wrap:break-word;'> {{object.issue_name}} </h4><br>
+                    <p class='card-text' style='font-size: 15px;padding-left:30px;padding-right:30px;width:100%;word-wrap:break-word;'>{{object.text}}</p><br>
+                    <br><br>
+                    <div class='card-link float-right' style='font-size: 12px;margin-top:3px;'><span style='font-size:13px;padding-right: 3px;'>at: </span> {{object.at}}</div>  
+                    <div class='card-link float-right' style='font-size: 18px;padding-right: 15px;'><span style='margin-right:12px'> {{object.created_by|title}}</span>  -</div>
+                    
+                    <div class='card-link float-left' style='font-size: 15px;'><span style='font-size: 12px;padding-right: 3px;'>assigned to: </span> {{object.assignto|title}}</div>
+                    </div>
+        </div>
+
+        <br>
+        
+        {% if object.isIssueSolved is False and user.is_authenticated %}       
+        
+        
+            <form method='POST'>
+            {% csrf_token %}
+            <div class='mx-auto' style='width:70%;height:100px;align-items: center;'>
+                <input name='issueCreator' hidden value='{{object.created_by}}' />
+                <textarea type='text' name='thetext' style='width:100%;height:100px;margin-bottom:12px;'> </textarea>
+                <input class='btn btn-primary float-right' type='submit' name='thebutton' value='Add Comment'/>
+            </div>
+            <br><br><br>
+            </form>
+
+        {% endif %}
+ <!--     style='visibility:hidden;display:none;'   -->
+
+        <div id='solvedComment' class='mx-auto' style='width:90%;visibility:hidden;display:none;border: 1px solid white;border-radius: 9px;margin-bottom:60px;margin-top:30px;padding-bottom:12px;'>
+            <label class='btn btn-info btn-sm' style='width:100%;text-align:center;border-radius: 9px;padding-top:9px;padding-bottom:9px;font-weight: bold;font-size:18px;pointer-events: none;'>Solution</label><br><br>
+            <label class='mx-auto' id='solvedText' style='width:100%;word-wrap:break-word;padding-left:30px;padding-right:30px;font-size: 15px;'>yoyoyoyoyoyoyoyoyoyoyoyoyoyoyoyoyoyoyoyoyoyoyoyoyoyoyoyo</label><br><br>
+            <label style='font-size:15px;margin-left:60px;margin-right:6px;'>-</label><label id='solvedName' style='font-size:15px;' >yoyoyoyoyoyoyoyoyoyoyoyoyoyoyoyoyoyoyoyoyoyoyoyoyoyoyoyo</label>
+        </div>
+
+
+        {% if object.isIssueSolved is True  %}
+            <script>
+            
+            </script>
+        {% endif %}
+
+        
+        
+         
+        
+
+
+
+        <h4 class='mx-auto'>Comments :</h3>
+        
+        {% if comments %}
+            <div class='mx-auto' style='width:90%'>
+                {% for c in comments %}
+                <div class='card' style='margin-bottom: 18px;'>
+                    <div class='card-body' style='background: black;'>
+                            
+
+                        {% if c.isThisCommentSolution is True and object.isIssueSolved is True %}
+                            <script>
+                                showsolvedcomment();
+                                updateSolvedCommentText('{{c.comment}}','{{c.created_by}}');
+                            </script>
+                        {% endif %}
+
+
+                        <span id='editcomment-{{c.commentId}}' style='visibility:hidden;display:none;'>
+                            <textarea id='txtarea-{{c.commentId}}' type='text' name='thetext' style='width:100%;'> </textarea>
+                            <input class='btn btn-secondary btn-sm float-right' style="margin-top:10px;margin-left:10px" type='button' name='cancelbutton' onclick="cancelIT('{{c.commentId}}')" value='Cancel'/>
+                            <input class='btn btn-primary btn-sm float-right' style="margin-top:10px;" type='button' name='savebutton' onclick="saveit('{{c.commentId}}')" value='Save'/>
+                        </span>
+                        
+                        <span id='savecomment-{{c.commentId}}'>
+                            {% if user.username == c.created_by and object.isIssueSolved is False %}
+                                <input type='button' id='{{c.commentId}}' class='btn btn-danger btn-sm float-right' name='deletebutton' onclick="deleteit('{{c.commentId}}')" value='Delete'/>
+                                <input type='button' id='{{c.commentId}}' class='btn btn-info btn-sm float-right' name='editbutton' style="margin-right:10px;" onclick="theclick('{{c.commentId}}','{{c.comment|addslashes}}')" value='Edit'/>
+                            {% endif %}
+
+                            {% if user.username == object.created_by and object.isIssueSolved is False %}
+                                <input type='button' class='btn btn-info btn-sm float-right' name='editbutton' style="margin-right:10px;" onclick="solvedItComment('{{c.commentId}}','{{object.theid}}')" value='Mark as Solution'/>
+                            {% endif %}
+                        
+                            <p class='card-text' style='font-size: 15px;padding-bottom: 6px;'>{{c.comment}}</p>                     
+                            <div class='card-link float-left' style='font-size: 15px;padding-left:15px;'>- {{c.created_by|title}}</div>
+                            <div class='card-link float-right' style='font-size: 12px;'>{{c.at}}</div>                 
+                        <span>
+                    </div> 
+                    <div class="divider" style="height:1px;background:#FFFFFF"></div>
+                </div> 
+                        
+            
+                
+                {% endfor %}
+            </div>
+
+
+        {% endif %}
+    {% endif %}
+{% else %}
+    cmon man Login
+{% endif %}
+{% endblock content %}
