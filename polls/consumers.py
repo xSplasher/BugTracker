@@ -7,7 +7,7 @@ from polls.models import *
 class NotificationConsumer(WebsocketConsumer):
 
     def receive(self, text_data):
-    text_data_json = json.loads(text_data)
+        text_data_json = json.loads(text_data)
 
     if text_data_json['purpose'] == 'update_notification':
 
@@ -15,5 +15,3 @@ class NotificationConsumer(WebsocketConsumer):
         thenewcomment = text_data_json['thenewcomment']
         print('######## ',theid,thenewcomment)
         #Comments.objects.filter(commentId=theid).update(comment=thenewcomment)
-
-        

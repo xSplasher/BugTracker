@@ -154,8 +154,8 @@ class GetNote(generic.View):
         print(theobs)
         return render(request, self.template_name,{'info':theobs})
 
-def vote(request, question_id):
-    ... # same as above, no changes needed.
+def vote(request):
+    return render(request, "polls/vote.html", {'theshit':'NO ITS NOT dood'})
 
 
 def theindex(request):

@@ -32,4 +32,4 @@ class GroupViewSet(viewsets.ModelViewSet):
 @api_view(['GET', 'POST'])
 def TestView(request):
     thedata = TestSerializer(Issues.objects.all(), many=True)
-    return Response(thedata.data)
+    return JsonResponse(thedata.data, safe=False)

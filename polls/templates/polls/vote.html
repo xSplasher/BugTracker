@@ -1,0 +1,37 @@
+<h1>yo</h1>
+
+<div id="app">
+    <ul>
+        <li v-for="item in message['data']" :key="item.issue_name">
+            [[ item.theid ]] [[ item.issue_name ]]
+        </li>
+    </ul>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/vue@2.6.12"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.21.1/axios.min.js"></script>
+<script>
+var app = new Vue({
+    delimiters: ["[[","]]"],
+    el: "#app",
+    data:  {
+        message: 'Hello!'
+    },
+    mounted () {
+        axios
+        .get('http://127.0.0.1:8000/my-api/')
+        .then(response => (this.message = response))
+    }
+});
+
+/* 
+
+    methods: {
+        something: function() {
+            axios.get('http://127.0.0.1:8000/my-api/').then(response => (this.message = response))
+            console.log('yo')
+        }
+    }
+
+*/
+</script>
