@@ -149,9 +149,11 @@
                         <input type='button' class='btn btn-danger btn-sm float-right' name='deleteIssue' style="margin-right:10px;" onclick="deleteIssue('{{object.theid}}')" value='Delete'>
                         <input type='button' class='btn btn-info btn-sm float-right' name='markIssue' style="margin-right:10px;" onclick="solvedit('{{object.theid}}')" value='Mark as Solved'><br><br>
                         
-                    {% elif object.isIssueSolved is True %}
-                        <label class='btn btn-info btn-sm float-right' name='solvedIssue' style="margin-right:10px;pointer-events: none;">Solved &#10003;</label>
                     {% endif %}
+                {% endif %}
+
+                {% if object.isIssueSolved is True %}
+                        <label class='btn btn-info btn-sm float-right' name='solvedIssue' style="margin-right:10px;pointer-events: none;">Solved &#10003;</label>
                 {% endif %}
                     <!--<span style='height: 15px;width: 15px;background-color:#e8e548;border-radius: 50%;display: inline-block;'></span>-->
                     
