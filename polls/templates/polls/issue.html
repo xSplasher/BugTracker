@@ -17,7 +17,7 @@
                 chatSocket.onmessage = function(e) {
                     const data = JSON.parse(e.data);
                     console.log(data['message']);
-                    if((data['from'] == 'solvedIssue' ||data['from'] == 'save' || data['from'] == 'delete') && data['message'] == 'success'){
+                    if((data['from'] == 'solvedIssue' || data['from'] == 'save' || data['from'] == 'delete') && data['message'] == 'success'){
                         location.reload();
                     }
 

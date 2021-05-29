@@ -1,0 +1,19 @@
+{% extends 'polls/base.html' %}
+
+{% block content %}
+
+<input type='button' class='btn btn-primary' value='Create Project' onclick="location.href='{% url "polls:newproject" %}'"/><br><br>
+
+
+    {% if projects %}
+        {% for project in projects %}
+            <h1>{{project.name}}</h1>
+        {% endfor %}
+        
+    {% else %}
+        yo
+
+    {% endif %}
+
+{% endblock content %}
+

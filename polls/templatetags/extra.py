@@ -4,8 +4,8 @@ from ..models import *
 register = template.Library()
 
 @register.simple_tag(takes_context=True)
-def get_all_users(context):
+def get_notification_for_user(context):
     theobs = Notifications.objects.filter(toUser=context['user'])
-    return {'thenotif':theobs,'ouruser':context['user']}
+    return {'the_notifications':theobs,'ouruser':context['user']}
 
     

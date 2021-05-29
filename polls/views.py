@@ -1,10 +1,10 @@
-from django.http import HttpResponseRedirect
+from django.http import HttpResponseRedirect, HttpResponse
 from django.shortcuts import get_object_or_404, render, redirect
 from django.urls import reverse
 from django.views import generic
 from django.contrib.auth import get_user_model
 
-
+from .forms import *
 import random
 from .models import *
 
@@ -35,7 +35,17 @@ def random_with_N_digits(n):
     return random.randint(range_start, range_end)
 
 
-class IndexView(generic.View):
+class Create_new_project(generic.edit.FormView):
+    template_name = 'polls/createproject.html'
+    form_class = CreateNewProject
+    success_url = '/'
+
+    def form_valid(self, form):
+        thename = form.cleaned_data['name']
+        Projects(theid=random_with_N_digits(15), name=thename).save()
+        return super().form_valid(form)
+
+class ListOfIssuesView(generic.View):
     template_name = 'polls/index.html'    
     
     def get(self, request, *args, **kwargs):
@@ -71,6 +81,23 @@ class IssueView(generic.View):
         return render(request, self.template_name)
 
 '''
+class NameView(generic.View):
+    template_name = 'polls/createproject.html'
+
+    def get(self, request, *args, **kwargs):
+        return render(request, self.template_name,{'projects':'yo'})
+
+    def post(self, request, *args, **kwargs):
+        return HttpResponse('POST request!')
+
+class ProjectsView(generic.View):
+    template_name = 'polls/showproject.html'
+    #slug_field = 'id'
+    
+    def get(self, request, *args, **kwargs):
+        theobs = Projects.objects.all()
+        return render(request, self.template_name,{'projects':theobs})
+
 
 class IssueView(generic.DetailView):    
     model = Issues
@@ -143,7 +170,7 @@ class CreateIssueView(generic.View):
            
         
 
-class GetNote(generic.View):
+class GetNote(generic.DetailView):
     template_name = 'polls/getnote.html'
 
     def get(self, request, *args, **kwargs):
@@ -153,6 +180,8 @@ class GetNote(generic.View):
         theobs = Issues.objects.filter(created_by=request.POST['thename'])
         print(theobs)
         return render(request, self.template_name,{'info':theobs})
+
+
 
 def vote(request):
     return render(request, "polls/vote.html", {'theshit':'NO ITS NOT dood'})

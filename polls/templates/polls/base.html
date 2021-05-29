@@ -47,8 +47,8 @@
         </nav>
             <div id='notificationSection' style='background:white;margin-left:75%;width:25%;height:600px;position: absolute;color:black;visibility:hidden;display:none;overflow: auto;'>
 
-                {% get_all_users as theusers %}
-                {% for thenot in  theusers.thenotif %}
+                {% get_notification_for_user as theobject %}
+                {% for thenot in  theobject.the_notifications %}
 
                 {% if thenot.isSeen is True %}
                     <div style='border: 1px solid black; cursor: pointer; ' onclick="location.href='http://{{request.META.HTTP_HOST }}{{thenot.theLink}}';">

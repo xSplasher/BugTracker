@@ -10,18 +10,23 @@ def random_with_N_digits():
 #MyModel.objects.filter(pk=some_value).update(field1='some value')
 # Create your models here.
 
+class Projects(models.Model):
+    theid = models.CharField(max_length=15)
+    name = models.CharField(max_length=200)
+
+    def __str__(self):
+        return self.name
+
 class Question(models.Model):
     question_text = models.CharField(max_length= 200)
     pub_date = models.DateTimeField('date published')
 
-
-class Choice(models.Model):
-    question = models.ForeignKey(Question, on_delete=models.CASCADE)
-    choice_text = models.CharField(max_length= 200)
-    votes = models.IntegerField(default=0)
+def default_fkey():
+    return Projects.objects.get(pk=1).id
 
 class Issues(models.Model):
     theid = models.CharField(max_length=15, editable=False)
+    project_it_belongs_to = models.ForeignKey(Projects, on_delete=models.CASCADE, default=default_fkey)
     issue_name = models.CharField(max_length=300)
     created_by = models.CharField(max_length=90)
     at = models.DateTimeField(default=datetime.now, editable=False)
