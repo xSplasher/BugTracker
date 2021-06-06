@@ -1,0 +1,16 @@
+sudo  snap install docker (install docker-compose)
+
+ended up reinstalling docker from docs using script
+
+
+
+##
+
+installing docker using sh script
+
+sudo curl -L "https://github.com/docker/compose/releases/download/1.29.2/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+# install docker compose
+
+sudo chmod +x /usr/local/bin/docker-compose
+#permission
+

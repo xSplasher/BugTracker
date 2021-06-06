@@ -1,0 +1,25 @@
+{% extends 'polls/base.html' %}
+
+{% block content %}
+
+<input type='button' class='btn btn-primary' value='Create Project' onclick="location.href='{% url "polls:newproject" %}'"/><br><br>
+
+
+    {% if projects %}
+
+        {% for key, val in projects.items %}
+            <p onclick='location.href="{% url 'polls:projectissues' key.theid %}"' style='width:300px;height:100px;cursor:pointer;padding-top:9px;padding-left:9px;margin-top:21px;background-color:#000000;color:#FFFFFF;border: 1px solid white;border-radius: 9px;'>{{key}} {{val}}</p>
+        {% endfor %}
+
+        <!--
+        {% for project in projects %}
+            <p style='height:60px'>{{project.name}}</p>
+        {% endfor %}
+        -->
+    {% else %}
+        yo
+
+    {% endif %}
+
+{% endblock content %}
+

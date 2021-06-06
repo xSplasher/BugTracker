@@ -34,6 +34,57 @@ def random_with_N_digits(n):
     range_end = (10**n)-1
     return random.randint(range_start, range_end)
 
+class ProjectsView(generic.View):
+    template_name = 'polls/showprojects.html'
+    #slug_field = 'id'
+    
+    def get(self, request, *args, **kwargs):
+        theobs = Projects.objects.all()
+        theinfo = {}
+        for ob in theobs:
+            theinfo[ob] = len(Issues.objects.filter(isIssueSolved=False).filter(project_it_belongs_to__name=ob))
+        #print(theinfo)
+        return render(request, self.template_name,{'projects':theinfo})
+
+
+
+class ListOfProjectIssuesView(generic.View):
+    template_name = 'polls/projectissues.html'
+    slug_field = 'theid'
+    
+    def get(self, request, *args, **kwargs):
+        #theqs = list(Issues.objects.all().values_list('issue_name', flat=True))
+        print(self.kwargs['slug'])
+        thejuice = Issues.objects.filter(project_it_belongs_to__theid=self.kwargs['slug']).order_by('-at')
+        thep = Projects.objects.get(theid=self.kwargs['slug'])
+        #theissues = Issues.objects.all().order_by('-at')
+        return render(request,self.template_name,{'object_list':thejuice,'theproject':thep})
+
+    def post(self, request, *args, **kwargs):
+        return HttpResponse('POST request!')
+'''
+class ListOfProjectIssuesView(generic.ListView):
+    model = Issues
+    template_name = 'polls/projectissues.html'
+    slug_field = 'theid'
+
+    def get_queryset(self):        
+        thething = Projects.objects.get(theid=self.kwargs['slug']).theid
+        thejuice = self.model.objects.filter(project_it_belongs_to__theid=thething)
+        #print(thejuice)        
+        return thejuice
+
+    
+    def get_queryset(self):
+        print('WWWW')
+        print(self.kwargs['slug'])
+        #print(self.slug_field)
+        thething = Projects.objects.get(theid=self.kwargs['slug']).theid
+        print(thething)
+        thejuice = super().get_queryset().filter(project_it_belongs_to__theid=thething)
+        print(thejuice)
+        return thejuice
+'''
 
 class Create_new_project(generic.edit.FormView):
     template_name = 'polls/createproject.html'
@@ -45,8 +96,10 @@ class Create_new_project(generic.edit.FormView):
         Projects(theid=random_with_N_digits(15), name=thename).save()
         return super().form_valid(form)
 
-class ListOfIssuesView(generic.View):
-    template_name = 'polls/index.html'    
+
+class ListALLIssuesView(generic.View):
+    template_name = 'polls/index.html'
+    #slug_field = 
     
     def get(self, request, *args, **kwargs):
         #theqs = list(Issues.objects.all().values_list('issue_name', flat=True))
@@ -65,6 +118,8 @@ class IndexMyTicketsView(generic.View):
         if request.user.is_authenticated:
             theissues = Issues.objects.all().filter(created_by=request.user.username).order_by('-at')
             return render(request,self.template_name,{'issues':theissues})
+        else:
+            return HttpResponse('Login man. cmon.')
 
     def post(self, request, *args, **kwargs):
         return HttpResponse('POST request!')
@@ -81,22 +136,7 @@ class IssueView(generic.View):
         return render(request, self.template_name)
 
 '''
-class NameView(generic.View):
-    template_name = 'polls/createproject.html'
 
-    def get(self, request, *args, **kwargs):
-        return render(request, self.template_name,{'projects':'yo'})
-
-    def post(self, request, *args, **kwargs):
-        return HttpResponse('POST request!')
-
-class ProjectsView(generic.View):
-    template_name = 'polls/showproject.html'
-    #slug_field = 'id'
-    
-    def get(self, request, *args, **kwargs):
-        theobs = Projects.objects.all()
-        return render(request, self.template_name,{'projects':theobs})
 
 
 class IssueView(generic.DetailView):    
@@ -106,11 +146,14 @@ class IssueView(generic.DetailView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+        print('wwwwwww')
+        print(type(self.get_object()))
+        print(self.get_object())
         context['comments'] = Comments.objects.filter(theIssue=self.get_object()).order_by('-at')
         return context
 
     def post(self, request, *args, **kwargs):
-        print(self.get_object().created_by)
+        #print(self.get_object().created_by)
         
         if request.user.is_authenticated:
             thecomment = Comments(theIssue=self.get_object(),comment=self.request.POST['thetext'],created_by=self.request.user.username)
@@ -138,9 +181,10 @@ class CreateIssueView(generic.View):
     template_name = 'polls/createissue.html'
     
     def get(self, request, *args, **kwargs):
-        print(self.request.user.username)
+        #print(self.request.user.username)
         theusers = Users.objects.all()
-        return render(request, self.template_name,{'theuserlist': theusers})
+        theprojects = Projects.objects.all()
+        return render(request, self.template_name,{'theuserlist': theusers,'theprojectlist':theprojects})
 
     def post(self, request, *args, **kwargs):
         #print(request.POST['thetext'])
@@ -154,10 +198,10 @@ class CreateIssueView(generic.View):
                 theprio = 'low'
             if request.POST['issueText'] != '':
                 thenewid = random_with_N_digits(15)
-                theitem = Issues(theid=thenewid,issue_name=request.POST['issueText'],created_by=self.request.user.username,text=request.POST['text'],priority=theprio,assignto=request.POST['assignto'])
+                theitem = Issues(theid=thenewid,issue_name=request.POST['issueText'],created_by=self.request.user.username,text=request.POST['text'],priority=theprio,assignto=request.POST['assignto'],project_it_belongs_to=Projects.objects.get(name=request.POST['project']))
                 theitem.save()
                 if request.user.username != request.POST['assignto'].lower():
-                    print(request.user.username,request.POST['assignto'],request.POST['assignto'].lower())
+                    #print(request.user.username,request.POST['assignto'],request.POST['assignto'].lower())
                     thenotification = Notifications(toUser=request.POST['assignto'],thetext='You have a new assignement from '+self.request.user.username+' !',theLink='/issue/'+str(thenewid),IssueReference=theitem)         
                     thenotification.save()
 
@@ -167,7 +211,9 @@ class CreateIssueView(generic.View):
                 return HttpResponseRedirect("")
         else:
             return HttpResponseRedirect("")
-           
+
+
+#################
         
 
 class GetNote(generic.DetailView):
@@ -178,7 +224,7 @@ class GetNote(generic.DetailView):
 
     def post(self, request, *args, **kwargs):
         theobs = Issues.objects.filter(created_by=request.POST['thename'])
-        print(theobs)
+        #print(theobs)
         return render(request, self.template_name,{'info':theobs})
 
 
