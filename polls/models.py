@@ -7,6 +7,12 @@ def random_with_N_digits():
     range_end = (10**20)-1
     return random.randint(range_start, range_end)
 
+
+def random_with_N_digits_15():
+    range_start = 10**(15-1)
+    range_end = (10**15)-1
+    return str(random.randint(range_start, range_end))
+
 #MyModel.objects.filter(pk=some_value).update(field1='some value')
 # Create your models here.
 
@@ -22,11 +28,11 @@ class Question(models.Model):
     pub_date = models.DateTimeField('date published')
 
 def default_fkey():
-    return Projects.objects.get(pk=1).id
+    return Projects.objects.get(pk=1).theid
 
 class Issues(models.Model):
-    theid = models.CharField(max_length=15, editable=False)
-    project_it_belongs_to = models.ForeignKey(Projects, on_delete=models.CASCADE, default=default_fkey)
+    theid = models.CharField(max_length=15, editable=False, default=random_with_N_digits_15)
+    project_it_belongs_to = models.ForeignKey(Projects, related_name='issues', on_delete=models.CASCADE, default=default_fkey)
     issue_name = models.CharField(max_length=300)
     created_by = models.CharField(max_length=90)
     at = models.DateTimeField(default=datetime.now, editable=False)
@@ -36,7 +42,7 @@ class Issues(models.Model):
     isIssueSolved = models.BooleanField(default=False)
 
     def __str__(self):
-        return self.issue_name
+        return self.issue_name + ' | ' + self.theid
 
 class Comments(models.Model):
     commentId = models.CharField(default=random_with_N_digits, max_length=20, editable=False)
