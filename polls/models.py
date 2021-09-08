@@ -1,6 +1,10 @@
 from django.db import models
+from django.contrib.auth.models import User
 from datetime import datetime
 import random
+
+from django.db.models.signals import post_save
+from django.dispatch import receiver
 
 def random_with_N_digits():
     range_start = 10**(20-1)
@@ -27,12 +31,15 @@ class Question(models.Model):
     question_text = models.CharField(max_length= 200)
     pub_date = models.DateTimeField('date published')
 
+
+'''
 def default_fkey():
     return Projects.objects.get(pk=1).theid
+'''
 
 class Issues(models.Model):
     theid = models.CharField(max_length=15, editable=False, default=random_with_N_digits_15)
-    project_it_belongs_to = models.ForeignKey(Projects, related_name='issues', on_delete=models.CASCADE, default=default_fkey)
+    project_it_belongs_to = models.ForeignKey(Projects, related_name='issues', on_delete=models.CASCADE, default=-999)
     issue_name = models.CharField(max_length=300)
     created_by = models.CharField(max_length=90)
     at = models.DateTimeField(default=datetime.now, editable=False)
@@ -68,3 +75,19 @@ class Notifications(models.Model):
 
     def __str__(self):
         return self.thetext
+
+
+class Profile(models.Model):
+    theUser = models.OneToOneField(User, on_delete=models.CASCADE)
+    isModerator = models.BooleanField(default=False)
+
+    def __str__(self):
+        return str(self.theUser)  + ' Profile'
+
+
+@receiver(post_save, sender=User)
+def do_something(sender, instance, created, **kwargs):
+    if created:
+        print('I MADE A NEW USER !!!!!!!')
+        print(instance)
+        Profile.objects.create(theUser=instance)

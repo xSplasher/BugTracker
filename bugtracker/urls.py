@@ -19,6 +19,10 @@ from registration import views
 from rest_framework import routers
 from api import views as vs
 from rest_framework.authtoken import views as authviews
+from rest_framework_simplejwt.views import (
+    TokenObtainPairView,
+    TokenRefreshView,
+)
 
 router = routers.DefaultRouter()
 router.register(r'users', vs.UserViewSet)
@@ -31,6 +35,8 @@ urlpatterns = [
     path('admin/', admin.site.urls),    
     path('chat/', include('chat.urls'), name='chat'),    
     path('register/', views.RegisterPage.as_view()),
+    path('api/token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
+    path('api/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
     path('api/', include('api.urls')),
     #path('api-auth/', include('rest_framework.urls', namespace='rest_framework')),
     #path('api/', include(router.urls)),

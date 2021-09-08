@@ -3,6 +3,9 @@ import string
 import random
 from django.contrib.auth.models import User
 
+from django.db.models.signals import post_save
+from django.dispatch import receiver
+
 # Create your models here.
 
 def createID():
@@ -19,12 +22,5 @@ class MyUser(models.Model):
         return str(self.name + ' ' + self.theid)
 
 
-class Profile(models.Model):
-    theUser = models.ForeignKey(User, on_delete=models.CASCADE, editable=False)
-    gender = models.CharField(max_length=2)
-    email = models.EmailField()
-
-    def __str__(self):
-        return str(self.theUser)
 
 

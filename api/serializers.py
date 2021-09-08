@@ -3,11 +3,19 @@ from rest_framework import serializers
 from polls.models import *
 
 
-class UserSerializer(serializers.HyperlinkedModelSerializer):
+class UserSerializer(serializers.ModelSerializer):
+
+    password = serializers.CharField(write_only=True)
+
     class Meta:
         model = User
-        fields = ['url', 'username', 'email', 'groups']
+        fields = ['username', 'password']
 
+    def create(self, validated_data):
+        user = super(UserSerializer, self).create(validated_data)
+        user.set_password(validated_data['password'])
+        user.save()
+        return user
 
 class GroupSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
@@ -36,9 +44,10 @@ class IssuesSerializer(serializers.ModelSerializer):
     def to_representation(self, instance):
         rep = super().to_representation(instance)
         #print('YOOOOOOO')
-        #print(instance)
+        #print(vars(instance))
+        #print('########################')
         try:
-            rep['project_it_belongs_to'] = ProjectSerializer(instance['project_it_belongs_to']).data['name'] # this is used so that get api/issue returns project name instead of object's id
+            rep['project_it_belongs_to'] = ProjectSerializer(instance.project_it_belongs_to).data['name'] # this is used so that get api/issue returns project name instead of object's id
         except:
             print('ah woops')
         
@@ -52,4 +61,10 @@ class ProjectSerializer(serializers.ModelSerializer): # used for listing issues 
     class Meta:
         model = Projects
         #exclude = ['id']
-        fields = ['name','issues']
+        fields = ['theid','name','issues']
+
+
+class CommentsSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Comments
+        fields = ['commentId','comment','theIssue','created_by','at','isThisCommentSolution']
