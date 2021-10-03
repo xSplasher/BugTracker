@@ -83,11 +83,11 @@ WSGI_APPLICATION = 'bugtrackerV2.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'NAME':'bugtracker_db2',
+        'NAME':'postgres',
         'USER':'postgres',
-        'PASSWORD':'2331998reda',
-        'HOST':'localhost',
-        'PORT':'5433',
+        'PASSWORD':'postgres',
+        'HOST':'db',
+        'PORT':'5432',
     }
 }
 

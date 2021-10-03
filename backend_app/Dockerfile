@@ -1,13 +1,15 @@
 FROM python:3.8-slim-buster
 
-WORKDIR /app
+ENV PYTHONUNBUFFERED=1
 
-COPY requirements.txt requirements.txt
+WORKDIR /app/backend_app
+
+COPY requirements.txt /app/backend_app/requirements.txt
 
 
 RUN pip3 install -r requirements.txt
 
-COPY . .
+COPY . /app/backend_app
 
 #CMD ["python3", "manage.py", "runserver", "0.0.0.0:8000"]
 
